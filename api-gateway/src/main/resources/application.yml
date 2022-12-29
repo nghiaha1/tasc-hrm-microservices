@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+redis:
+  config: D:/TASC/microservice/project/config/singleNodeConfig.yaml
+
+zuul:
+  routes:
+    user:
+      path: /user/**
+      url: http://localhost:8082/api/v1/user
+
+    employee:
+      path: /employee/**
+      url: http://localhost:8083/api/v1/employee
+
+    department:
+      path: /department/**
+      url: http://localhost:8084/api/v1/department
+
+spring:
+  application:
+    name: prj-api-gw
