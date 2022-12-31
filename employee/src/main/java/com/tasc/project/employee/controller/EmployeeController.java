@@ -29,8 +29,19 @@ public class EmployeeController extends BaseController {
         return createdResponse(employeeService.findAll(status, page, pageSize));
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/find/id/{id}")
     public ResponseEntity<BaseResponseV2> findById(@PathVariable long id) throws ApplicationException {
         return createdResponse(employeeService.findById(id));
+    }
+
+    @GetMapping(path = "/find/name/{fullName}")
+    public ResponseEntity<BaseResponseV2> findByFullName(@PathVariable String fullName) throws ApplicationException {
+        return createdResponse(employeeService.findByFullName(fullName));
+    }
+
+    @PutMapping(path = "/{employeeId}/{userId}")
+    public ResponseEntity<BaseResponseV2> updateUser(@PathVariable long employeeId,
+                                                     @PathVariable long userId) throws ApplicationException {
+        return createdResponse(employeeService.updateUser(employeeId, userId));
     }
 }

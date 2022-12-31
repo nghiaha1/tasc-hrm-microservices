@@ -3,18 +3,13 @@ package com.tasc.project.user.controller;
 import com.tasc.controller.BaseController;
 import com.tasc.model.ApplicationException;
 import com.tasc.model.BaseResponseV2;
-import com.tasc.project.user.entity.User;
 import com.tasc.project.user.model.request.LoginRequest;
 import com.tasc.project.user.model.request.RegisterRequest;
 import com.tasc.project.user.service.UserService;
-import com.tasc.redis.dto.UserLoginDTO;
 import org.apache.logging.log4j.core.appender.AppenderLoggingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/user")
@@ -31,5 +26,10 @@ public class UserController extends BaseController {
     @PostMapping(path = "/login")
     public ResponseEntity<BaseResponseV2> login(@RequestBody LoginRequest request) throws ApplicationException {
         return createdResponse(userService.login(request));
+    }
+
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<BaseResponseV2> findById(@PathVariable long id) throws ApplicationException {
+        return createdResponse(userService.findById(id));
     }
 }

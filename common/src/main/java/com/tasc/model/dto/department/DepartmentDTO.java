@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class DepartmentDTO implements Serializable {
 
+    private long id;
     private String name;
 
     private String description;

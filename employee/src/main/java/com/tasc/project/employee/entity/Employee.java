@@ -49,6 +49,7 @@ public class Employee extends BaseEntity {
 
     private long roleId;
 
+    @Column(nullable = true)
     private long userId;
 
     private long positionId;

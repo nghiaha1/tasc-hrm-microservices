@@ -63,6 +63,12 @@ public class UserService {
 
         userRepository.save(user);
 
+        BaseResponseV2<EmployeeDTO> updateEmployeeInfoResponse = employeeConnector.updateUser(request.getEmployeeId(), user.getId());
+
+        if (!updateEmployeeInfoResponse.isSuccess()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM);
+        }
+
         return new BaseResponseV2<User>(user);
     }
 
@@ -107,6 +113,23 @@ public class UserService {
         userLoginRepository.save(userLoginDTO);
 
         return new BaseResponseV2<UserLoginDTO>(userLoginDTO);
+    }
+
+    public BaseResponseV2<UserResDTO> findById(long id) throws ApplicationException {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found user with Id: " + id);
+        }
+
+        User user = optionalUser.get();
+        UserResDTO userResDTO = UserResDTO.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .employee(user.getEmployee())
+                .status(user.getStatus().statusCode)
+                .build();
+
+        return new BaseResponseV2<UserResDTO>(userResDTO);
     }
 
     public void handleEventOrder(UserResDTO userResDTO){

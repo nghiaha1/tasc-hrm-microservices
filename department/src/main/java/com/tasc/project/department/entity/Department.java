@@ -24,7 +24,8 @@ public class Department extends BaseEntity {
     private String description;
 
     private String detail;
-    @ElementCollection
+
+    @Lob
     private List<String> employeeList;
 
     @ManyToOne

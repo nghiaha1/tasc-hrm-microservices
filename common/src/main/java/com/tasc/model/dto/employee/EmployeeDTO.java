@@ -35,8 +35,10 @@ public class EmployeeDTO implements Serializable {
 
     private String detail;
 
-//    private long userId;
+    private long userId;
 
     private BaseStatus status;
 
+    public void setUserId(Long aLong) {
+    }
 }

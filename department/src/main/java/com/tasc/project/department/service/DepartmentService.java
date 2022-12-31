@@ -10,6 +10,7 @@ import com.tasc.model.dto.employee.EmployeeDTO;
 import com.tasc.project.department.connector.EmployeeConnector;
 import com.tasc.project.department.entity.Department;
 import com.tasc.project.department.model.request.CreateDepartmentRequest;
+import com.tasc.project.department.repository.DepartmentEmployeeRepository;
 import com.tasc.project.department.repository.DepartmentRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class DepartmentService {
 
     @Autowired
     EmployeeConnector employeeConnector;
+
+    @Autowired
+    DepartmentEmployeeRepository departmentEmployeeRepository;
 
     public BaseResponseV2<DepartmentDTO> create(CreateDepartmentRequest request) throws ApplicationException {
         validateRequest(request);
@@ -176,5 +180,40 @@ public class DepartmentService {
         }
     }
 
-
+//    public BaseResponseV2 delete(long id) throws ApplicationException {
+//        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+//
+//        if (optionalDepartment.isEmpty()) {
+//            throw new ApplicationException(ERROR.INVALID_PARAM, "Department not found");
+//        }
+//
+//        Department department = optionalDepartment.get();
+//
+//        /* check if department is root
+//           if root delete relationship with children department*/
+//        if (department.getIsRoot() == 0) {
+//            department.getChildrenDepartment().remove(department);
+//        }
+//
+//        // delete relationship with parent department if exist
+//        for (Department d : department.getChildrenDepartment()) {
+//            if (d.getParentDepartment() != null) {
+//                this.delete(d.getId());
+//            }
+//        }
+//
+//        if (!department.getEmployeeList().isEmpty()) {
+//            List<String> employeeList = department.getEmployeeList();
+//            //delete relationship with employee if exist
+//            for (int i = 0; i < employeeList.size(); i++) {
+//                BaseResponseV2<List<EmployeeDTO>> employeeListResponse = employeeConnector.findEmployeeByFullName(employeeList.get(i));
+//                if (!employeeListResponse.isSuccess()) {
+//                    throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with fullName: " + employeeList.get(i));
+//                }
+//
+//                List<EmployeeDTO> employeeDTOList = employeeListResponse.getData();
+//
+//            }
+//        }
+//    }
 }
