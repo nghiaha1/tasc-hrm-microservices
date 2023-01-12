@@ -11,4 +11,8 @@ public class BaseController {
     public ResponseEntity<BaseResponseV2> createdResponse(BaseResponseV2 response, HttpStatus httpStatus){
         return new ResponseEntity<>(response , httpStatus);
     }
+
+    public ResponseEntity<BaseResponseV2> createdResponse(HttpStatus httpStatus) {
+        return new ResponseEntity<>(httpStatus);
+    }
 }

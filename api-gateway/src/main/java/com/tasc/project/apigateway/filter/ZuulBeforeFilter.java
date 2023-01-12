@@ -3,7 +3,6 @@ package com.tasc.project.apigateway.filter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
-
 import com.tasc.model.constans.AUTHENTICATION;
 import com.tasc.project.apigateway.security.UserDetailExtend;
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
@@ -11,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Component
 public class ZuulBeforeFilter extends ZuulFilter {
@@ -34,8 +35,13 @@ public class ZuulBeforeFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         UserDetailExtend userDetailExtend = getUseDetail();
 
+        HttpServletRequest request = ctx.getRequest();
+
+        String authorizationHeader = request.getHeader("Authorization");
+
         if (userDetailExtend != null){
             ctx.addZuulRequestHeader(AUTHENTICATION.HEADER.USER_ID, String.valueOf(userDetailExtend.getUserId()));
+            ctx.addZuulRequestHeader(AUTHENTICATION.HEADER.ROLE, String.valueOf(userDetailExtend.getRole()));
         }
         return null;
     }
@@ -51,8 +57,6 @@ public class ZuulBeforeFilter extends ZuulFilter {
         } catch (Exception e) {
             return null;
         }
-
-
     }
 
 

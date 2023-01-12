@@ -15,6 +15,8 @@ public class UserLoginDTO {
 
     private long userId;
 
+    private String role;
+
     @TimeToLive(unit = TimeUnit.SECONDS)
     private long timeToLive;
 }

@@ -6,11 +6,11 @@ public enum BaseStatus {
     PENDING(2, "Pending"),
     BLOCKED(3, "Blocked")
     ;
-    public int statusCode;
+    public int code;
     public String status;
 
-    BaseStatus(int statusCode, String status) {
-        this.statusCode = statusCode;
+    BaseStatus(int code, String status) {
+        this.code = code;
         this.status = status;
     }
 }

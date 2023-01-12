@@ -62,6 +62,5 @@ public class Oauth2AuthorizationFilter extends BasicAuthenticationFilter {
 
         SecurityContextHolder.getContext().setAuthentication(tassUserAuthentication);
         chain.doFilter(request, response);
-
     }
 }

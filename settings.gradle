@@ -4,4 +4,6 @@ include 'api-gateway'
 include 'department'
 include 'user'
 include 'employee'
+include 'salary'
+include 'attendance'
 

@@ -1,0 +1,30 @@
+server:
+  port: 8085
+
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/salary?createDatabaseIfNotExist=true
+    username: root
+    password:
+
+    hikari:
+      connection-timeout: 3600000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      pool-name: batch4
+
+  jpa:
+    show-sql: true
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: update

@@ -41,6 +41,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().exceptionHandling();
 
+        httpSercurity.authorizeRequests()
+                .antMatchers("/employee/**").hasAnyAuthority("ADMIN");
+
         http.authorizeRequests().anyRequest().authenticated();
     }
 

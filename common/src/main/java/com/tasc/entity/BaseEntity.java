@@ -12,7 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
-import java.util.Date;
+import java.time.LocalDate;
 
 @MappedSuperclass
 @Getter
@@ -23,13 +23,13 @@ public class BaseEntity {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private Date updatedAt;
+    private LocalDate updatedAt;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private BaseStatus status;
 }

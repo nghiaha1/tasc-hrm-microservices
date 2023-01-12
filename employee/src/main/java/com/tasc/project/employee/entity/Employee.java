@@ -33,8 +33,6 @@ public class Employee extends BaseEntity {
 
     private String phone;
 
-//    private String type;
-
     private BigDecimal salary;
 
     private BigDecimal bonus;
@@ -46,8 +44,6 @@ public class Employee extends BaseEntity {
 
     // relationship
     private long departmentId;
-
-    private long roleId;
 
     @Column(nullable = true)
     private long userId;

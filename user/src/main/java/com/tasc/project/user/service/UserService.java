@@ -109,6 +109,7 @@ public class UserService {
         userLoginDTO.setToken(token);
         userLoginDTO.setUserId(user.getId());
         userLoginDTO.setTimeToLive(3600);
+//        userLoginDTO.setRoleDTOS();
 
         userLoginRepository.save(userLoginDTO);
 
@@ -126,7 +127,7 @@ public class UserService {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .employee(user.getEmployee())
-                .status(user.getStatus().statusCode)
+                .status(user.getStatus().code)
                 .build();
 
         return new BaseResponseV2<UserResDTO>(userResDTO);

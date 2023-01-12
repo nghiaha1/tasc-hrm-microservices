@@ -17,6 +17,11 @@ public class BaseResponseV2<T> {
         return this.code == ERROR.SUCCESS.code;
     }
 
+    public BaseResponseV2(String message) {
+        this.code = ERROR.SUCCESS.code;
+        this.message = message;
+    }
+
     public BaseResponseV2(T data) {
         this.code = ERROR.SUCCESS.code;
         this.message = "SUCCESS";
