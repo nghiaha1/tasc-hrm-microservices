@@ -1,4 +1,4 @@
-package com.tasc.project.attendance.model.request;
+package com.tasc.model.dto;
 
 import com.tasc.entity.AttendanceStatus;
 import lombok.*;
@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AttendanceRequest {
+public class AttendanceDTO {
+    private long id;
+
     private long employeeId;
 
     private LocalDateTime checkIn;
@@ -18,5 +20,7 @@ public class AttendanceRequest {
     private LocalDateTime checkOut;
 
     private AttendanceStatus attendanceStatus;
+
+    private String reason;
 
 }

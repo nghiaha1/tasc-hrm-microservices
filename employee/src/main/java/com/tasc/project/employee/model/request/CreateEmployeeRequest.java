@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -29,6 +30,8 @@ public class CreateEmployeeRequest {
     private String description;
 
     private String detail;
+
+    private BigDecimal hourlyRate;
 
 //    private long departmentId;
 

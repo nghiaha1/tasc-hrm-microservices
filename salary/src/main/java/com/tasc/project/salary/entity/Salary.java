@@ -22,9 +22,4 @@ public class Salary extends BaseEntity {
 
     private BigDecimal amount;
 
-    private String payPeriod;
-
-    private BigDecimal tax;
-
-    private BigDecimal bonus;
 }

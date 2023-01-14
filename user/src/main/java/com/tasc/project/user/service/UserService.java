@@ -4,13 +4,14 @@ import com.tasc.entity.BaseStatus;
 import com.tasc.model.ApplicationException;
 import com.tasc.model.BaseResponseV2;
 import com.tasc.model.ERROR;
-import com.tasc.model.constans.MESSAGE;
 import com.tasc.model.dto.employee.EmployeeDTO;
 import com.tasc.model.dto.user.UserResDTO;
 import com.tasc.project.user.connector.EmployeeConnector;
+import com.tasc.project.user.entity.Role;
 import com.tasc.project.user.entity.User;
 import com.tasc.project.user.model.request.LoginRequest;
 import com.tasc.project.user.model.request.RegisterRequest;
+import com.tasc.project.user.repository.RoleRepository;
 import com.tasc.project.user.repository.UserRepository;
 import com.tasc.redis.dto.UserLoginDTO;
 import com.tasc.redis.repository.UserLoginRepository;
@@ -26,6 +27,9 @@ import java.util.UUID;
 public class UserService {
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     @Autowired
     UserLoginRepository userLoginRepository;
@@ -60,6 +64,14 @@ public class UserService {
         user.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
         user.setStatus(BaseStatus.ACTIVE);
         user.setEmployee(employeeDTO.getFullName());
+
+        Optional<Role> optionalRole = roleRepository.findRoleByName("ROLE_USER");
+
+        if (optionalRole.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "USER role not found");
+        }
+
+        user.setRole(optionalRole.get());
 
         userRepository.save(user);
 
@@ -108,6 +120,7 @@ public class UserService {
 
         userLoginDTO.setToken(token);
         userLoginDTO.setUserId(user.getId());
+        userLoginDTO.setRole(user.getRole().getName());
         userLoginDTO.setTimeToLive(3600);
 //        userLoginDTO.setRoleDTOS();
 
@@ -127,31 +140,10 @@ public class UserService {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .employee(user.getEmployee())
-                .status(user.getStatus().code)
+                .status(user.getStatus())
                 .build();
 
         return new BaseResponseV2<UserResDTO>(userResDTO);
     }
 
-    public void handleEventOrder(UserResDTO userResDTO){
-        // handle event order
-
-        if (userResDTO.getStatus() == MESSAGE.STATUS.CREATED){
-            this.handleOrderEventCreated(userResDTO);
-            return;
-        }
-
-        if (userResDTO.getStatus() == MESSAGE.STATUS.SUCCESS){
-            this.handleOrderEventSuccess(userResDTO);
-            return;
-        }
-        if (userResDTO.getStatus() == MESSAGE.STATUS.FAIL){
-            this.handleOrderEventFail(userResDTO);
-            return;
-        }
-    }
-
-    public void handleOrderEventCreated(UserResDTO userResDTO){}
-    public void handleOrderEventSuccess(UserResDTO userResDTO){}
-    public void handleOrderEventFail(UserResDTO userResDTO){}
 }

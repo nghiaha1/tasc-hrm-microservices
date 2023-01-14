@@ -22,8 +22,6 @@ public class RedisMessageSubscriber implements MessageListener {
 
         UserResDTO userResDTO = JsonHelper.getObject(msg , UserResDTO.class);
 
-        userService.handleEventOrder(userResDTO);
-
         log.info("USER-SERVICE order event created {}" , msg);
     }
 }

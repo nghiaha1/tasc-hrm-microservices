@@ -26,7 +26,7 @@ public class Employee extends BaseEntity {
     @Column(length = 1)
     private String gender;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dob;
 
     private String email;
@@ -42,8 +42,14 @@ public class Employee extends BaseEntity {
     @Lob
     private String detail;
 
+    private BigDecimal hourlyRate;
+
     // relationship
-    private long departmentId;
+    @ManyToOne
+    @JoinTable(name = "department_employee",
+            joinColumns = @JoinColumn(name = "employee_id"),
+            inverseJoinColumns = @JoinColumn(name = "department_id"))
+    private Department department;
 
     @Column(nullable = true)
     private long userId;

@@ -1,4 +1,4 @@
-package com.tasc.project.department.entity;
+package com.tasc.project.employee.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

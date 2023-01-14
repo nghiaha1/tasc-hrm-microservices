@@ -5,28 +5,20 @@ import com.tasc.entity.BaseStatus;
 import com.tasc.model.ApplicationException;
 import com.tasc.model.BaseResponseV2;
 import com.tasc.model.ERROR;
+import com.tasc.model.dto.AttendanceDTO;
 import com.tasc.model.dto.employee.EmployeeDTO;
 import com.tasc.project.attendance.connector.EmployeeConnector;
 import com.tasc.project.attendance.entity.Attendance;
 import com.tasc.project.attendance.model.request.AttendanceRequest;
 import com.tasc.project.attendance.repository.AttendanceRepository;
-import com.tasc.project.attendance.search.AttendanceSpecification;
-import com.tasc.project.attendance.search.SearchBody;
-import com.tasc.project.attendance.search.SearchCriteria;
-import com.tasc.project.attendance.search.SearchCriteriaOperator;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AttendanceService {
@@ -36,7 +28,7 @@ public class AttendanceService {
     @Autowired
     EmployeeConnector employeeConnector;
 
-    public BaseResponseV2<Attendance> saveAttendance(AttendanceRequest request) throws ApplicationException {
+    public BaseResponseV2<AttendanceDTO> saveAttendance(AttendanceRequest request) throws ApplicationException {
         BaseResponseV2<EmployeeDTO> employeeResponseInfo = employeeConnector.findById(request.getEmployeeId());
 
         if (!employeeResponseInfo.isSuccess()) {
@@ -55,35 +47,57 @@ public class AttendanceService {
 
         Attendance attendance = Attendance.builder()
                 .employeeId(request.getEmployeeId())
-                .attendanceStatus(request.getAttendanceStatus())
-                .reason(request.getReason())
+                .checkIn(request.getCheckIn())
+                .checkOut(request.getCheckOut())
                 .build();
+        
+        if (StringUtils.isBlank(String.valueOf(request.getEmployeeId())) ||
+                request.getCheckIn() == null ||
+                request.getCheckOut() == null) {
+            attendance.setAttendanceStatus(AttendanceStatus.ABSENT);
+        }
+        
+        attendance.setAttendanceStatus(AttendanceStatus.PRESENT);
+        
         attendanceRepository.save(attendance);
 
-        return new BaseResponseV2<Attendance>(attendance);
+        AttendanceDTO attendanceDTO = AttendanceDTO.builder()
+                .id(attendance.getId())
+                .employeeId(attendance.getEmployeeId())
+                .checkIn(attendance.getCheckIn())
+                .checkOut(attendance.getCheckOut())
+                .attendanceStatus(attendance.getAttendanceStatus())
+                .build();
+
+        return new BaseResponseV2<AttendanceDTO>(attendanceDTO);
     }
 
     public BaseResponseV2<Attendance> getAttendanceByEmployeeId(long employeeId) throws ApplicationException {
-        BaseResponseV2<EmployeeDTO> employeeResponseInfo = employeeConnector.findById(employeeId);
 
-        if (!employeeResponseInfo.isSuccess()) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with id: " + employeeId);
-        }
-
-        EmployeeDTO employeeDTO = employeeResponseInfo.getData();
-
-        if (employeeDTO == null) {
-            throw new ApplicationException(ERROR.INVALID_PARAM);
-        }
-
-        if (employeeDTO.getStatus() != BaseStatus.ACTIVE) {
-            return new BaseResponseV2<>("Employee is not Active");
-        }
+        checkEmployeeByEmployeeId(employeeId);
 
         return new BaseResponseV2<>(attendanceRepository.findAttendanceByEmployeeId(employeeId));
     }
 
-    public BaseResponseV2<Double> getAttendancePercentage(long employeeId, LocalDate startDate, LocalDate endDate) throws ApplicationException {
+    public BaseResponseV2<List<AttendanceDTO>> findAll() throws ApplicationException {
+        List<Attendance> attendanceList = attendanceRepository.findAll();
+        List<AttendanceDTO> attendanceDTOS = new ArrayList<>();
+
+        for (Attendance attendance : attendanceList) {
+            AttendanceDTO attendanceDTO = AttendanceDTO.builder()
+                    .id(attendance.getId())
+                    .employeeId(attendance.getEmployeeId())
+                    .checkIn(attendance.getCheckIn())
+                    .checkOut(attendance.getCheckOut())
+                    .attendanceStatus(attendance.getAttendanceStatus())
+                    .build();
+            attendanceDTOS.add(attendanceDTO);
+        }
+
+        return new BaseResponseV2<List<AttendanceDTO>>(attendanceDTOS);
+    }
+
+    private void checkEmployeeByEmployeeId(long employeeId) throws ApplicationException {
         BaseResponseV2<EmployeeDTO> employeeResponseInfo = employeeConnector.findById(employeeId);
 
         if (!employeeResponseInfo.isSuccess()) {
@@ -97,72 +111,63 @@ public class AttendanceService {
         }
 
         if (employeeDTO.getStatus() != BaseStatus.ACTIVE) {
-            return new BaseResponseV2<>("Employee is not Active");
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Employee is not ACTIVE");
         }
-
-        List<Attendance> attendanceList = attendanceRepository.findAttendanceByEmployeeIdAndDateBetween(employeeId, startDate, endDate);
-
-        if (attendanceList.isEmpty()) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Attendance list is empty");
-        }
-
-        long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        long presentDays = attendanceList.stream().
-                filter(attendance -> attendance.getAttendanceStatus().equals(AttendanceStatus.PRESENT)).count();
-
-        return new BaseResponseV2<>((double) (presentDays / totalDays) * 100);
     }
 
-    public BaseResponseV2<List<Attendance>> getAttendanceByDateRange(LocalDate startDate, LocalDate endDate) throws ApplicationException {
-        List<Attendance> attendanceList = attendanceRepository.findAttendanceByDateBetween(startDate, endDate);
+    public BaseResponseV2<AttendanceDTO> findById(long id) throws ApplicationException {
+        Optional<Attendance> optionalAttendance = attendanceRepository.findById(id);
 
-        if (!attendanceList.isEmpty()) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Attendance list is empty");
+        if (optionalAttendance.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found attendance with ID: " + id);
         }
 
-        return new BaseResponseV2<List<Attendance>>(attendanceList);
+        Attendance attendance = optionalAttendance.get();
+
+        AttendanceDTO attendanceDTO = AttendanceDTO.builder()
+                .id(attendance.getId())
+                .employeeId(attendance.getEmployeeId())
+                .checkIn(attendance.getCheckIn())
+                .checkOut(attendance.getCheckOut())
+                .attendanceStatus(attendance.getAttendanceStatus())
+                .build();
+
+        return new BaseResponseV2<>(attendanceDTO);
     }
 
-    public BaseResponseV2<Map<String, Object>> findAll(SearchBody searchBody) throws ApplicationException {
-        Specification specification = Specification.where(null);
+    public BaseResponseV2 delete(long id) throws ApplicationException {
+        Optional<Attendance> optionalAttendance = attendanceRepository.findById(id);
 
-        if (searchBody.getEmployeeId() > 0) {
-            specification = specification.and(new AttendanceSpecification(
-                    new SearchCriteria("employee", SearchCriteriaOperator.EQUALS, searchBody.getEmployeeId())));
+        if (optionalAttendance.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found attendance with ID: " + id);
         }
 
-        if (searchBody.getStartDate() != null && searchBody.getStartDate().length() > 0) {
-            specification = specification.and(new AttendanceSpecification(
-                    new SearchCriteria("date", SearchCriteriaOperator.GREATER_THAN_OR_EQUALS, searchBody.getStartDate())));
+        attendanceRepository.deleteById(id);
+
+        return new BaseResponseV2("Delete Success");
+    }
+
+    public BaseResponseV2<List<AttendanceDTO>> findByEmployeeAndDateRange(long employeeId, LocalDate startDate, LocalDate endDate) throws ApplicationException {
+        List<Attendance> attendanceRecords = attendanceRepository.findAttendanceByEmployeeIdAndDateBetween(employeeId, startDate, endDate);
+
+        if (attendanceRecords.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "List null");
         }
 
-        if (searchBody.getEndDate() != null && searchBody.getEndDate().length() > 0) {
-            specification = specification.and(new AttendanceSpecification(
-                    new SearchCriteria("date", SearchCriteriaOperator.LESS_THAN_OR_EQUALS, searchBody.getEndDate())));
+        List<AttendanceDTO> attendanceDTOS = new ArrayList<>();
+
+        for (Attendance attendance : attendanceRecords) {
+            AttendanceDTO attendanceDTO = AttendanceDTO.builder()
+                    .id(attendance.getId())
+                    .employeeId(attendance.getEmployeeId())
+                    .checkIn(attendance.getCheckIn())
+                    .checkOut(attendance.getCheckOut())
+                    .attendanceStatus(attendance.getAttendanceStatus())
+                    .build();
+            attendanceDTOS.add(attendanceDTO);
         }
 
-        if (searchBody.getStatus() > -1) {
-            specification = specification.and(new AttendanceSpecification(
-                    new SearchCriteria("status", SearchCriteriaOperator.EQUALS, searchBody.getEndDate())));
-        }
+        return new BaseResponseV2<>(attendanceDTOS);
 
-        Sort sort = Sort.by(Sort.Order.asc("id"));
-        if (searchBody.getSort() != null && searchBody.getSort().length() > 0) {
-            if (searchBody.getSort().contains("desc")) {
-                sort = Sort.by(Sort.Order.desc("id"));
-            }
-        }
-
-        Pageable pageable = PageRequest.of(searchBody.getPage() - 1, searchBody.getPageSize(), sort);
-        Page<Attendance> attendancePage = attendanceRepository.findAll(specification, pageable);
-        List<Attendance> attendanceList = attendancePage.getContent();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", attendanceList);
-        response.put("currentPage", attendancePage.getNumber() + 1);
-        response.put("totalItems", attendancePage.getTotalElements());
-        response.put("totalPage", attendancePage.getTotalPages());
-
-        return new BaseResponseV2<>(response);
     }
 }

@@ -14,10 +14,6 @@ zuul:
       path: /employee/**
       url: http://localhost:8083/api/v1/employee
 
-    department:
-      path: /department/**
-      url: http://localhost:8084/api/v1/department
-
 spring:
   application:
     name: prj-api-gw

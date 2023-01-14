@@ -49,6 +49,7 @@ public class EmployeeService {
                 .detail(employee.getDetail())
                 .status(employee.getStatus())
                 .userId(employee.getUserId())
+                .hourlyRate(employee.getHourlyRate())
                 .build();
 
         return new BaseResponseV2<EmployeeDTO>(employeeDTO);
@@ -77,6 +78,7 @@ public class EmployeeService {
                     .detail(employee.getDetail())
                     .status(employee.getStatus())
                     .userId(employee.getUserId())
+                    .hourlyRate(employee.getHourlyRate())
                     .build();
 
             employeeDTOList.add(employeeDTO);
@@ -85,7 +87,7 @@ public class EmployeeService {
         return new BaseResponseV2<List<EmployeeDTO>>(employeeDTOList);
     }
 
-    public BaseResponseV2<Page<Employee>> findAll(String status, int page, int pageSize) throws ApplicationException {
+    public BaseResponseV2<Page<Employee>> findAll(BaseStatus status, int page, int pageSize) throws ApplicationException {
         if (page <= 0) {
             page = 1;
         }
@@ -128,6 +130,7 @@ public class EmployeeService {
                 .detail(employee.getDetail())
                 .status(employee.getStatus())
                 .userId(userId)
+                .hourlyRate(employee.getHourlyRate())
                 .build();
 
         return new BaseResponseV2<EmployeeDTO>(employeeDTO);
@@ -144,6 +147,7 @@ public class EmployeeService {
                 .phone(request.getPhone())
                 .description(request.getDescription())
                 .detail(request.getDetail())
+                .hourlyRate(request.getHourlyRate())
                 .build();
         employee.setStatus(BaseStatus.ACTIVE);
 

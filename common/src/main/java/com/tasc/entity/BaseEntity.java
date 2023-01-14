@@ -30,6 +30,6 @@ public class BaseEntity {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDate updatedAt;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private BaseStatus status;
 }

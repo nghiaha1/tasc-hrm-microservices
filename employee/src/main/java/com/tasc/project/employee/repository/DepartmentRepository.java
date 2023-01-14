@@ -1,6 +1,7 @@
-package com.tasc.project.department.repository;
+package com.tasc.project.employee.repository;
 
-import com.tasc.project.department.entity.Department;
+
+import com.tasc.project.employee.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

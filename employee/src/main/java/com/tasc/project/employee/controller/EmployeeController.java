@@ -1,6 +1,7 @@
 package com.tasc.project.employee.controller;
 
 import com.tasc.controller.BaseController;
+import com.tasc.entity.BaseStatus;
 import com.tasc.model.ApplicationException;
 import com.tasc.model.BaseResponseV2;
 import com.tasc.project.employee.model.request.CreateEmployeeRequest;
@@ -22,11 +23,11 @@ public class EmployeeController extends BaseController {
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponseV2> findAll(@RequestParam(required = false) String status,
+    public ResponseEntity<BaseResponseV2> findAll(@RequestParam(required = false, defaultValue = "ACTIVE") String status,
                                                   @RequestParam(defaultValue = "1") int page,
                                                   @RequestParam(name = "page_size", defaultValue = "10") int pageSize)
             throws ApplicationException {
-        return createdResponse(employeeService.findAll(status, page, pageSize));
+        return createdResponse(employeeService.findAll(BaseStatus.valueOf(status), page, pageSize));
     }
 
     @GetMapping(path = "/find/id/{id}")

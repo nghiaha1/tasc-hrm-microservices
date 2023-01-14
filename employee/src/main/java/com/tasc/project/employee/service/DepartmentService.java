@@ -1,4 +1,4 @@
-package com.tasc.project.department.service;
+package com.tasc.project.employee.service;
 
 import com.tasc.entity.BaseStatus;
 import com.tasc.entity.Constant;
@@ -6,12 +6,13 @@ import com.tasc.model.ApplicationException;
 import com.tasc.model.BaseResponseV2;
 import com.tasc.model.ERROR;
 import com.tasc.model.dto.department.DepartmentDTO;
-import com.tasc.model.dto.employee.EmployeeDTO;
-import com.tasc.project.department.connector.EmployeeConnector;
-import com.tasc.project.department.entity.Department;
-import com.tasc.project.department.model.request.CreateDepartmentRequest;
-import com.tasc.project.department.repository.DepartmentEmployeeRepository;
-import com.tasc.project.department.repository.DepartmentRepository;
+import com.tasc.project.employee.entity.Department;
+import com.tasc.project.employee.entity.DepartmentEmployee;
+import com.tasc.project.employee.entity.Employee;
+import com.tasc.project.employee.model.request.CreateDepartmentRequest;
+import com.tasc.project.employee.repository.DepartmentEmployeeRepository;
+import com.tasc.project.employee.repository.DepartmentRepository;
+import com.tasc.project.employee.repository.EmployeeRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class DepartmentService {
     DepartmentRepository departmentRepository;
 
     @Autowired
-    EmployeeConnector employeeConnector;
+    EmployeeRepository employeeRepository;
 
     @Autowired
     DepartmentEmployeeRepository departmentEmployeeRepository;
@@ -59,21 +60,16 @@ public class DepartmentService {
             parentDepartment.getChildrenDepartment().add(department);
             department.setStatus(BaseStatus.ACTIVE);
 
-            List<String> employeeList = new ArrayList<>();
+            List<Employee> employeeList = new ArrayList<>();
 
             for (int i = 0; i < request.getEmployeeIdList().size(); i++) {
-                BaseResponseV2<EmployeeDTO> employeeDTOResponse = employeeConnector.findEmployeeById(request.getEmployeeIdList().get(i));
-                if (!employeeDTOResponse.isSuccess()) {
-                    throw new ApplicationException(ERROR.INVALID_PARAM);
+                Optional<Employee> optionalEmployee = employeeRepository.findById(request.getEmployeeIdList().get(i));
+
+                if (optionalEmployee.isEmpty()) {
+                    throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with ID : " + request.getEmployeeIdList().get(i));
                 }
+                Employee employee = optionalEmployee.get();
 
-                EmployeeDTO employeeDTO = employeeDTOResponse.getData();
-
-                if (employeeDTO == null) {
-                    throw new ApplicationException(ERROR.INVALID_PARAM);
-                }
-
-                String employee = employeeDTO.getFullName();
                 employeeList.add(employee);
             }
 
@@ -81,21 +77,29 @@ public class DepartmentService {
 
             departmentRepository.save(department);
 
-            List<String> childrenDepartment = new ArrayList<>();
-            for (Department d: childDepartments) {
-                String departmentName = d.getName();
-                childrenDepartment.add(departmentName);
+            List<Long> childrenDepartment = new ArrayList<>();
+            for (Department d : childDepartments) {
+                Long departmentId = d.getId();
+                childrenDepartment.add(departmentId);
             }
 
             DepartmentDTO departmentDTO = DepartmentDTO.builder()
                     .name(department.getName())
                     .description(department.getDescription())
                     .detail(department.getDetail())
-                    .employeeList(department.getEmployeeList())
                     .parentDepartment(department.getParentDepartment().getName())
                     .childrenDepartmentList(childrenDepartment)
                     .isRoot(department.getIsRoot())
                     .build();
+
+            List<Long> employeeIdList = new ArrayList<>();
+
+            for (Employee employee : department.getEmployeeList()) {
+                if (StringUtils.isNotBlank(String.valueOf(employee.getId()))) {
+                    employeeIdList.add(employee.getId());
+                    departmentDTO.setEmployeeList(employeeIdList);
+                }
+            }
 
             return new BaseResponseV2<DepartmentDTO>(departmentDTO);
         }
@@ -113,21 +117,16 @@ public class DepartmentService {
         department.setParentDepartment(null);
         department.setStatus(BaseStatus.ACTIVE);
 
-        List<String> employeeList = new ArrayList<>();
+        List<Employee> employeeList = new ArrayList<>();
 
         for (int i = 0; i < request.getEmployeeIdList().size(); i++) {
-            BaseResponseV2<EmployeeDTO> employeeDTOResponse = employeeConnector.findEmployeeById(request.getEmployeeIdList().get(i));
-            if (!employeeDTOResponse.isSuccess()) {
-                throw new ApplicationException(ERROR.INVALID_PARAM);
+            Optional<Employee> optionalEmployee = employeeRepository.findById(request.getEmployeeIdList().get(i));
+
+            if (optionalEmployee.isEmpty()) {
+                throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with ID : " + request.getEmployeeIdList().get(i));
             }
+            Employee employee = optionalEmployee.get();
 
-            EmployeeDTO employeeDTO = employeeDTOResponse.getData();
-
-            if (employeeDTO == null) {
-                throw new ApplicationException(ERROR.INVALID_PARAM);
-            }
-
-            String employee = employeeDTO.getFullName();
             employeeList.add(employee);
         }
 
@@ -135,21 +134,29 @@ public class DepartmentService {
 
         departmentRepository.save(department);
 
-        List<String> childrenDepartment = new ArrayList<>();
-        for (Department d: childDepartments) {
-            String departmentName = d.getName();
-            childrenDepartment.add(departmentName);
+        List<Long> childrenDepartment = new ArrayList<>();
+        for (Department d : childDepartments) {
+            Long departmentId = d.getId();
+            childrenDepartment.add(departmentId);
         }
 
         DepartmentDTO departmentDTO = DepartmentDTO.builder()
                 .name(department.getName())
                 .description(department.getDescription())
                 .detail(department.getDetail())
-                .employeeList(department.getEmployeeList())
                 .parentDepartment(department.getParentDepartment().getName())
                 .childrenDepartmentList(childrenDepartment)
                 .isRoot(department.getIsRoot())
                 .build();
+
+        List<Long> employeeIdList = new ArrayList<>();
+
+        for (Employee employee : department.getEmployeeList()) {
+            if (StringUtils.isNotBlank(String.valueOf(employee.getId()))) {
+                employeeIdList.add(employee.getId());
+                departmentDTO.setEmployeeList(employeeIdList);
+            }
+        }
 
         return new BaseResponseV2<DepartmentDTO>(departmentDTO);
     }
@@ -180,40 +187,37 @@ public class DepartmentService {
         }
     }
 
-//    public BaseResponseV2 delete(long id) throws ApplicationException {
-//        Optional<Department> optionalDepartment = departmentRepository.findById(id);
-//
-//        if (optionalDepartment.isEmpty()) {
-//            throw new ApplicationException(ERROR.INVALID_PARAM, "Department not found");
-//        }
-//
-//        Department department = optionalDepartment.get();
-//
-//        /* check if department is root
-//           if root delete relationship with children department*/
-//        if (department.getIsRoot() == 0) {
-//            department.getChildrenDepartment().remove(department);
-//        }
-//
-//        // delete relationship with parent department if exist
-//        for (Department d : department.getChildrenDepartment()) {
-//            if (d.getParentDepartment() != null) {
-//                this.delete(d.getId());
-//            }
-//        }
-//
-//        if (!department.getEmployeeList().isEmpty()) {
-//            List<String> employeeList = department.getEmployeeList();
-//            //delete relationship with employee if exist
-//            for (int i = 0; i < employeeList.size(); i++) {
-//                BaseResponseV2<List<EmployeeDTO>> employeeListResponse = employeeConnector.findEmployeeByFullName(employeeList.get(i));
-//                if (!employeeListResponse.isSuccess()) {
-//                    throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with fullName: " + employeeList.get(i));
-//                }
-//
-//                List<EmployeeDTO> employeeDTOList = employeeListResponse.getData();
-//
-//            }
-//        }
-//    }
+    public BaseResponseV2 delete(long id) throws ApplicationException {
+        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+
+        if (optionalDepartment.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department not found");
+        }
+
+        Department department = optionalDepartment.get();
+
+        /* check if department is root
+           if root delete relationship with children department */
+        if (department.getIsRoot() == 0) {
+            department.getChildrenDepartment().remove(department);
+        }
+
+        // delete relationship with parent department if exist
+        for (Department d : department.getChildrenDepartment()) {
+            if (d.getParentDepartment() != null) {
+                this.delete(d.getId());
+            }
+        }
+
+        //delete relationship with employee if exist
+        for (Employee e : department.getEmployeeList()) {
+            DepartmentEmployee.DePk deId = new DepartmentEmployee.DePk(department.getId(), e.getId());
+            departmentEmployeeRepository.deleteById(deId);
+        }
+
+        departmentRepository.deleteById(id);
+
+        return new BaseResponseV2();
+
+    }
 }

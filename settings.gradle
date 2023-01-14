@@ -1,7 +1,6 @@
 rootProject.name = 'project'
 include 'common'
 include 'api-gateway'
-include 'department'
 include 'user'
 include 'employee'
 include 'salary'

@@ -39,6 +39,8 @@ public class EmployeeDTO implements Serializable {
 
     private BaseStatus status;
 
+    private BigDecimal hourlyRate;
+
     public void setUserId(Long aLong) {
     }
 }

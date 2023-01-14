@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class TassUserAuthentication extends UsernamePasswordAuthenticationToken {
 
-    public TassUserAuthentication(UserDetailExtend userDetailExtend  ) {
-        super(userDetailExtend, null , new ArrayList<>());
+    public TassUserAuthentication(UserDetailExtend userDetailExtend) {
+        super(userDetailExtend, null, new ArrayList<>());
     }
 }

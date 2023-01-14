@@ -19,11 +19,11 @@ public class DepartmentDTO implements Serializable {
 
     private String detail;
 
-    private List<String> employeeList;
+    private List<Long> employeeList;
 
     private String parentDepartment;
 
-    private List<String> childrenDepartmentList;
+    private List<Long> childrenDepartmentList;
 
     private int isRoot;
 }

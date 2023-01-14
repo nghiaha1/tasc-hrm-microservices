@@ -1,4 +1,4 @@
-package com.tasc.project.department.entity;
+package com.tasc.project.employee.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.tasc.entity.BaseEntity;
@@ -25,8 +25,8 @@ public class Department extends BaseEntity {
 
     private String detail;
 
-    @Lob
-    private List<String> employeeList;
+    @OneToMany(mappedBy = "department")
+    private List<Employee> employeeList;
 
     @ManyToOne
     @JoinTable(name = "department_relationship",

@@ -1,5 +1,6 @@
 package com.tasc.model.dto.user;
 
+import com.tasc.entity.BaseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,9 @@ public class UserResDTO implements Serializable {
 
     private String username;
 
+    private String role;
+
     private String employee;
 
-    private int status;
+    private BaseStatus status;
 }

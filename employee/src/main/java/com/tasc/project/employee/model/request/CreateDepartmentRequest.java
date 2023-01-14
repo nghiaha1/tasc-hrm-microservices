@@ -1,4 +1,4 @@
-package com.tasc.project.department.model.request;
+package com.tasc.project.employee.model.request;
 
 import com.tasc.entity.BaseStatus;
 import com.tasc.entity.Constant;
