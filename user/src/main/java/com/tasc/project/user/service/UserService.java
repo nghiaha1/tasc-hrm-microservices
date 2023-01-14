@@ -9,6 +9,7 @@ import com.tasc.model.dto.user.UserResDTO;
 import com.tasc.project.user.connector.EmployeeConnector;
 import com.tasc.project.user.entity.Role;
 import com.tasc.project.user.entity.User;
+import com.tasc.project.user.model.request.ChangePasswordRequest;
 import com.tasc.project.user.model.request.LoginRequest;
 import com.tasc.project.user.model.request.RegisterRequest;
 import com.tasc.project.user.repository.RoleRepository;
@@ -81,26 +82,9 @@ public class UserService {
             throw new ApplicationException(ERROR.INVALID_PARAM);
         }
 
-        return new BaseResponseV2<User>(user);
+        return new BaseResponseV2<>(user);
     }
 
-    private void validationRegisterRequest(RegisterRequest request) throws ApplicationException {
-        if (StringUtils.isBlank(request.getUsername())) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Username is empty");
-        }
-
-        if (StringUtils.isBlank(request.getPassword())) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Password is empty");
-        }
-
-        if (!request.getPassword().equals(request.getRePassword())) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Password not match");
-        }
-
-        if (StringUtils.isBlank(String.valueOf(request.getEmployeeId()))) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Employee is empty");
-        }
-    }
 
     public BaseResponseV2<UserLoginDTO> login(LoginRequest request) throws ApplicationException {
         Optional<User> optionalUser = userRepository.findUserByUsername(request.getUsername());
@@ -121,12 +105,11 @@ public class UserService {
         userLoginDTO.setToken(token);
         userLoginDTO.setUserId(user.getId());
         userLoginDTO.setRole(user.getRole().getName());
-        userLoginDTO.setTimeToLive(3600);
-//        userLoginDTO.setRoleDTOS();
+        userLoginDTO.setTimeToLive(1);
 
         userLoginRepository.save(userLoginDTO);
 
-        return new BaseResponseV2<UserLoginDTO>(userLoginDTO);
+        return new BaseResponseV2<>(userLoginDTO);
     }
 
     public BaseResponseV2<UserResDTO> findById(long id) throws ApplicationException {
@@ -143,7 +126,24 @@ public class UserService {
                 .status(user.getStatus())
                 .build();
 
-        return new BaseResponseV2<UserResDTO>(userResDTO);
+        return new BaseResponseV2<>(userResDTO);
     }
 
+    private void validationRegisterRequest(RegisterRequest request) throws ApplicationException {
+        if (StringUtils.isBlank(request.getUsername())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Username is empty");
+        }
+
+        if (StringUtils.isBlank(request.getPassword())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Password is empty");
+        }
+
+        if (!request.getPassword().equals(request.getRePassword())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Password not match");
+        }
+
+        if (StringUtils.isBlank(String.valueOf(request.getEmployeeId()))) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Employee is empty");
+        }
+    }
 }

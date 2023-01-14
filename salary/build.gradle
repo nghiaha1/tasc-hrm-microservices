@@ -8,14 +8,23 @@ group = 'com.tasc.project'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2021.0.5")
+}
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-}
 
-repositories {
-    mavenCentral()
+    //eliminates logback
+    all*.exclude group: 'ch.qos.logback'
+
+    //eliminates StackOverflowError
+    all*.exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
 }
 
 dependencies {

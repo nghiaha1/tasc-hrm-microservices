@@ -10,13 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AttendanceRequest {
+public class CheckOutRequest {
     private long employeeId;
-
-    private LocalDateTime checkIn;
-
-    private LocalDateTime checkOut;
-
-    private AttendanceStatus attendanceStatus;
 
 }

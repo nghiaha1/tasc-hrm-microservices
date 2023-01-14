@@ -41,8 +41,14 @@ public class EmployeeController extends BaseController {
     }
 
     @PutMapping(path = "/{employeeId}/{userId}")
-    public ResponseEntity<BaseResponseV2> updateUser(@PathVariable long employeeId,
-                                                     @PathVariable long userId) throws ApplicationException {
-        return createdResponse(employeeService.updateUser(employeeId, userId));
+    public ResponseEntity<BaseResponseV2> addUser(@PathVariable long employeeId,
+                                                  @PathVariable long userId) throws ApplicationException {
+        return createdResponse(employeeService.addUser(employeeId, userId));
+    }
+
+    @PutMapping(path = "/{employeeId}")
+    public ResponseEntity<BaseResponseV2> updateEmployee(@PathVariable long employeeId,
+                                                         @RequestBody CreateEmployeeRequest request) throws ApplicationException {
+        return createdResponse(employeeService.updateEmployee(employeeId, request));
     }
 }

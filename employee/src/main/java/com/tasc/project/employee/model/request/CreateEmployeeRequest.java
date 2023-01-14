@@ -25,14 +25,12 @@ public class CreateEmployeeRequest {
 
     private String phone;
 
-//    private String type;
-
     private String description;
 
     private String detail;
 
-    private BigDecimal hourlyRate;
+    private BigDecimal monthlyRate;
 
-//    private long departmentId;
+    private long departmentId;
 
 }

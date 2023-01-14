@@ -15,7 +15,6 @@ import java.util.List;
 public class UserDetailExtend implements UserDetails {
     private long userId;
 
-    private String role;
 
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -23,12 +22,10 @@ public class UserDetailExtend implements UserDetails {
 
     }
 
-//    UserLoginDTO
 
-//    public UserDetailExtend(UserLoginDTO userLoginDTO){
-//        this.userId = userLoginDTO.getUserId();
-//        this.role = userLoginDTO.getRole();
-//    }
+    public UserDetailExtend(UserLoginDTO userLoginDTO){
+        this.userId = userLoginDTO.getUserId();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -64,19 +61,5 @@ public class UserDetailExtend implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public UserDetailExtend(UserLoginDTO userLoginDTO) {
-        userId = userLoginDTO.getUserId();
-        role = userLoginDTO.getRole();
-
-        List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
-        authorities = new ArrayList<SimpleGrantedAuthority>();
-
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(userLoginDTO.getRole());
-
-        simpleGrantedAuthorities.add(authority);
-
-        authorities = simpleGrantedAuthorities;
     }
 }

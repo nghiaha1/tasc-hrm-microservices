@@ -8,15 +8,17 @@ import com.tasc.model.dto.employee.EmployeeDTO;
 import com.tasc.project.salary.connector.AttendanceConnector;
 import com.tasc.project.salary.connector.EmployeeConnector;
 import com.tasc.project.salary.repository.SalaryRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Service
+@Log4j2
 public class SalaryService {
     @Autowired
     SalaryRepository salaryRepository;
@@ -54,16 +56,22 @@ public class SalaryService {
             throw new ApplicationException(ERROR.INVALID_PARAM);
         }
 
-        BigDecimal totalHours = BigDecimal.ZERO;
+        BigDecimal totalMonths = BigDecimal.ZERO;
 
         for (AttendanceDTO attendanceDTO : attendanceDTOList) {
-            Duration duration = Duration.between(attendanceDTO.getCheckIn(), attendanceDTO.getCheckOut());
-            totalHours = totalHours.add(new BigDecimal(duration.toHours()));
+//            Duration duration = Duration.between(attendanceDTO.getCheckIn(), attendanceDTO.getCheckOut());
+//            totalHours = totalHours.add(new BigDecimal(duration.toHours()));
         }
 
-        BigDecimal hourlyRate = employeeDTO.getHourlyRate();
+        Period period = Period.between(startDate, endDate);
+        totalMonths = totalMonths.add(new BigDecimal(period.getMonths() + period.getYears() * 12));
 
-        return new BaseResponseV2<>(totalHours.multiply(hourlyRate));
+        BigDecimal monthlyRate = employeeDTO.getMontlyRate();
+
+        log.info("Hourly rate : {}", monthlyRate );
+        log.info("Total hours : {}", totalMonths );
+
+        return new BaseResponseV2<>(totalMonths.multiply(monthlyRate));
     }
 
 }

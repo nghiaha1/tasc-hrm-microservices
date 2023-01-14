@@ -41,7 +41,6 @@ public class ZuulBeforeFilter extends ZuulFilter {
 
         if (userDetailExtend != null){
             ctx.addZuulRequestHeader(AUTHENTICATION.HEADER.USER_ID, String.valueOf(userDetailExtend.getUserId()));
-            ctx.addZuulRequestHeader(AUTHENTICATION.HEADER.ROLE, String.valueOf(userDetailExtend.getRole()));
         }
         return null;
     }

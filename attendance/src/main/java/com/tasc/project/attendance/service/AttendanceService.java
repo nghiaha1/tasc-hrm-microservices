@@ -9,18 +9,24 @@ import com.tasc.model.dto.AttendanceDTO;
 import com.tasc.model.dto.employee.EmployeeDTO;
 import com.tasc.project.attendance.connector.EmployeeConnector;
 import com.tasc.project.attendance.entity.Attendance;
-import com.tasc.project.attendance.model.request.AttendanceRequest;
+import com.tasc.project.attendance.model.request.CheckInRequest;
+import com.tasc.project.attendance.model.request.CheckOutRequest;
 import com.tasc.project.attendance.repository.AttendanceRepository;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log4j2
 public class AttendanceService {
     @Autowired
     AttendanceRepository attendanceRepository;
@@ -28,7 +34,7 @@ public class AttendanceService {
     @Autowired
     EmployeeConnector employeeConnector;
 
-    public BaseResponseV2<AttendanceDTO> saveAttendance(AttendanceRequest request) throws ApplicationException {
+    public BaseResponseV2<AttendanceDTO> checkInAttendance(CheckInRequest request) throws ApplicationException {
         BaseResponseV2<EmployeeDTO> employeeResponseInfo = employeeConnector.findById(request.getEmployeeId());
 
         if (!employeeResponseInfo.isSuccess()) {
@@ -47,18 +53,15 @@ public class AttendanceService {
 
         Attendance attendance = Attendance.builder()
                 .employeeId(request.getEmployeeId())
-                .checkIn(request.getCheckIn())
-                .checkOut(request.getCheckOut())
                 .build();
-        
-        if (StringUtils.isBlank(String.valueOf(request.getEmployeeId())) ||
-                request.getCheckIn() == null ||
-                request.getCheckOut() == null) {
+
+        if (StringUtils.isBlank(String.valueOf(request.getEmployeeId()))) {
             attendance.setAttendanceStatus(AttendanceStatus.ABSENT);
         }
-        
-        attendance.setAttendanceStatus(AttendanceStatus.PRESENT);
-        
+
+        attendance.setAttendanceStatus(AttendanceStatus.PENDING);
+        attendance.setStatus(BaseStatus.ACTIVE);
+
         attendanceRepository.save(attendance);
 
         AttendanceDTO attendanceDTO = AttendanceDTO.builder()
@@ -69,7 +72,51 @@ public class AttendanceService {
                 .attendanceStatus(attendance.getAttendanceStatus())
                 .build();
 
-        return new BaseResponseV2<AttendanceDTO>(attendanceDTO);
+        return new BaseResponseV2<>(attendanceDTO);
+    }
+
+    public BaseResponseV2<AttendanceDTO> checkOutAttendance(long id, CheckOutRequest request) throws ApplicationException {
+        BaseResponseV2<EmployeeDTO> employeeResponseInfo = employeeConnector.findById(request.getEmployeeId());
+
+        if (!employeeResponseInfo.isSuccess()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with id: " + request.getEmployeeId());
+        }
+
+        EmployeeDTO employeeDTO = employeeResponseInfo.getData();
+
+        if (employeeDTO == null) {
+            throw new ApplicationException(ERROR.INVALID_PARAM);
+        }
+
+        if (employeeDTO.getStatus() != BaseStatus.ACTIVE) {
+            return new BaseResponseV2<>("Employee is not Active");
+        }
+
+        Optional<Attendance> optionalAttendance = attendanceRepository.findById(id);
+
+        if (optionalAttendance.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found attendance with ID : " + id);
+        }
+
+        Attendance existedAttendance = optionalAttendance.get();
+
+        existedAttendance.setAttendanceStatus(AttendanceStatus.PRESENT);
+
+//        existedAttendance.setStatus(BaseStatus.ACTIVE);
+
+        attendanceRepository.save(existedAttendance);
+
+        AttendanceDTO attendanceDTO = AttendanceDTO.builder()
+                .id(existedAttendance.getId())
+                .employeeId(existedAttendance.getEmployeeId())
+                .checkIn(existedAttendance.getCheckIn())
+                .checkOut(existedAttendance.getCheckOut())
+                .attendanceStatus(existedAttendance.getAttendanceStatus())
+                .build();
+
+//        log.error(existedAttendance.getCheckIn().toLocalTime());
+
+        return new BaseResponseV2<>(attendanceDTO);
     }
 
     public BaseResponseV2<Attendance> getAttendanceByEmployeeId(long employeeId) throws ApplicationException {

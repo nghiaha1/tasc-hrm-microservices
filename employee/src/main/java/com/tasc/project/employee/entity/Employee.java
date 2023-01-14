@@ -1,7 +1,9 @@
 package com.tasc.project.employee.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tasc.entity.BaseEntity;
+import com.tasc.project.employee.util.MoneySerializer;
 import lombok.*;
 
 import javax.persistence.*;
@@ -23,7 +25,6 @@ public class Employee extends BaseEntity {
 
     private String fullName;
 
-    @Column(length = 1)
     private String gender;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -33,16 +34,17 @@ public class Employee extends BaseEntity {
 
     private String phone;
 
+    @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal salary;
 
-    private BigDecimal bonus;
-
+    @Lob
     private String description;
 
     @Lob
     private String detail;
 
-    private BigDecimal hourlyRate;
+    @JsonSerialize(using = MoneySerializer.class)
+    private BigDecimal monthlyRate;
 
     // relationship
     @ManyToOne
@@ -51,9 +53,5 @@ public class Employee extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "department_id"))
     private Department department;
 
-    @Column(nullable = true)
     private long userId;
-
-    private long positionId;
-
 }

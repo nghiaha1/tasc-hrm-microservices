@@ -33,5 +33,4 @@ public class UserController extends BaseController {
     public ResponseEntity<BaseResponseV2> findById(@PathVariable long id) throws ApplicationException {
         return createdResponse(userService.findById(id));
     }
-
 }

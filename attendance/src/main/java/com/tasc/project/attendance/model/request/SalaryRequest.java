@@ -1,9 +1,7 @@
-package com.tasc.project.salary.model.request;
+package com.tasc.project.attendance.model.request;
 
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -15,9 +13,7 @@ public class SalaryRequest {
 
     private long employeeId;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 }

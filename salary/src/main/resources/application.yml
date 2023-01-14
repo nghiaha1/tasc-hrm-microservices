@@ -28,3 +28,9 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: update
+
+#redis:
+#  config: D:/TASC/microservice/project/config/singleNodeConfig.yaml
+
+redis:
+  config: D:/TASC/tasc-project-microservices/config/singleNodeConfig.yaml

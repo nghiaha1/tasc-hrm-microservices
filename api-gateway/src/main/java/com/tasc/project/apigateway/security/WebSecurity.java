@@ -35,15 +35,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .requestCache().disable()
                 .csrf().disable().authorizeRequests().and();
 
-        httpSercurity.authorizeRequests()
-                .antMatchers("/employee/**")
-                .hasAnyAuthority("ROLE_ADMIN");
-
         BasicAuthenticationFilter filter = new Oauth2AuthorizationFilter(authenticationManager(), userLoginRepository);
         httpSercurity.addFilterBefore(filter, BasicAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().exceptionHandling();
-
 
         http.authorizeRequests().anyRequest().authenticated();
     }

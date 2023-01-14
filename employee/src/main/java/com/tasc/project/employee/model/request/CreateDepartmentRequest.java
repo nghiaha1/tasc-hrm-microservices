@@ -20,8 +20,6 @@ public class CreateDepartmentRequest {
 
     private String detail;
 
-    private List<Long> employeeIdList;
-
     private List<Long> childrenDepartmentIdList;
 
     private Long parentDepartmentId;

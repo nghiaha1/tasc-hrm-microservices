@@ -6,8 +6,10 @@ import com.tasc.model.BaseResponseV2;
 import com.tasc.model.ERROR;
 import com.tasc.model.dto.employee.EmployeeDTO;
 import com.tasc.project.employee.connector.UserConnector;
+import com.tasc.project.employee.entity.Department;
 import com.tasc.project.employee.entity.Employee;
 import com.tasc.project.employee.model.request.CreateEmployeeRequest;
+import com.tasc.project.employee.repository.DepartmentRepository;
 import com.tasc.project.employee.repository.EmployeeRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ public class EmployeeService {
 
     @Autowired
     UserConnector userConnector;
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
     public BaseResponseV2<EmployeeDTO> findById(long id) throws ApplicationException {
         Optional<Employee> optionalEmployee = employeeRepository.findById(id);
@@ -44,15 +48,15 @@ public class EmployeeService {
                 .email(employee.getEmail())
                 .phone(employee.getPhone())
                 .salary(employee.getSalary())
-                .bonus(employee.getBonus())
                 .description(employee.getDescription())
                 .detail(employee.getDetail())
                 .status(employee.getStatus())
                 .userId(employee.getUserId())
-                .hourlyRate(employee.getHourlyRate())
+                .montlyRate(employee.getMonthlyRate())
+                .departmentId(employee.getDepartment().getId())
                 .build();
 
-        return new BaseResponseV2<EmployeeDTO>(employeeDTO);
+        return new BaseResponseV2<>(employeeDTO);
     }
 
     public BaseResponseV2<List<EmployeeDTO>> findByFullName(String fullName) throws ApplicationException {
@@ -73,12 +77,12 @@ public class EmployeeService {
                     .email(employee.getEmail())
                     .phone(employee.getPhone())
                     .salary(employee.getSalary())
-                    .bonus(employee.getBonus())
                     .description(employee.getDescription())
                     .detail(employee.getDetail())
                     .status(employee.getStatus())
                     .userId(employee.getUserId())
-                    .hourlyRate(employee.getHourlyRate())
+                    .montlyRate(employee.getMonthlyRate())
+                    .departmentId(employee.getDepartment().getId())
                     .build();
 
             employeeDTOList.add(employeeDTO);
@@ -98,14 +102,10 @@ public class EmployeeService {
 
         Page<Employee> employeeList = employeeRepository.findEmployeesByStatus(status, PageRequest.of(page - 1, pageSize));
 
-        if (employeeList.isEmpty()) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Employee list is empty");
-        }
-
-        return new BaseResponseV2<Page<Employee>>(employeeList);
+        return new BaseResponseV2<>(employeeList);
     }
 
-    public BaseResponseV2<EmployeeDTO> updateUser(long employeeId, long userId) throws ApplicationException {
+    public BaseResponseV2<EmployeeDTO> addUser(long employeeId, long userId) throws ApplicationException {
         Optional<Employee> optionalEmployee = employeeRepository.findById(employeeId);
 
         if (optionalEmployee.isEmpty()) {
@@ -125,19 +125,27 @@ public class EmployeeService {
                 .email(employee.getEmail())
                 .phone(employee.getPhone())
                 .salary(employee.getSalary())
-                .bonus(employee.getBonus())
                 .description(employee.getDescription())
                 .detail(employee.getDetail())
                 .status(employee.getStatus())
                 .userId(userId)
-                .hourlyRate(employee.getHourlyRate())
+                .montlyRate(employee.getMonthlyRate())
+                .departmentId(employee.getDepartment().getId())
                 .build();
 
-        return new BaseResponseV2<EmployeeDTO>(employeeDTO);
+        return new BaseResponseV2<>(employeeDTO);
     }
 
     public BaseResponseV2<Employee> createdEmployee(CreateEmployeeRequest request) throws ApplicationException {
         invalidationEmployeeRequest(request);
+
+        Optional<Department> optionalDepartment = departmentRepository.findById(request.getDepartmentId());
+
+        if (optionalDepartment.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found department with ID : " + request.getDepartmentId());
+        }
+
+        Department department = optionalDepartment.get();
 
         Employee employee = Employee.builder()
                 .fullName(request.getFullName())
@@ -147,13 +155,60 @@ public class EmployeeService {
                 .phone(request.getPhone())
                 .description(request.getDescription())
                 .detail(request.getDetail())
-                .hourlyRate(request.getHourlyRate())
+                .monthlyRate(request.getMonthlyRate())
+                .department(department)
                 .build();
         employee.setStatus(BaseStatus.ACTIVE);
 
         employeeRepository.save(employee);
 
-        return new BaseResponseV2<Employee>(employee);
+        return new BaseResponseV2<>(employee);
+    }
+
+    public BaseResponseV2<EmployeeDTO> updateEmployee(long id, CreateEmployeeRequest request) throws ApplicationException {
+        invalidationEmployeeRequest(request);
+
+        Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+
+        if (optionalEmployee.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with ID : " + id);
+        }
+
+        Employee existedEmployee = optionalEmployee.get();
+
+        Optional<Department> optionalDepartment = departmentRepository.findById(request.getDepartmentId());
+
+        if (optionalDepartment.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found department with ID : " + request.getDepartmentId());
+        }
+
+        Department department = optionalDepartment.get();
+
+        existedEmployee.setFullName(request.getFullName());
+        existedEmployee.setGender(request.getGender());
+        existedEmployee.setDob(request.getDob());
+        existedEmployee.setEmail(request.getEmail());
+        existedEmployee.setPhone(request.getPhone());
+        existedEmployee.setDescription(request.getDescription());
+        existedEmployee.setDetail(request.getDetail());
+        existedEmployee.setMonthlyRate(request.getMonthlyRate());
+        existedEmployee.setDepartment(department);
+
+        employeeRepository.save(existedEmployee);
+
+        EmployeeDTO employeeDTO = EmployeeDTO.builder()
+                .fullName(request.getFullName())
+                .gender(request.getGender())
+                .dob(request.getDob())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .description(request.getDescription())
+                .detail(request.getDetail())
+                .montlyRate(request.getMonthlyRate())
+                .departmentId(request.getDepartmentId())
+                .build();
+
+        return new BaseResponseV2<>(employeeDTO);
     }
 
     private void invalidationEmployeeRequest(CreateEmployeeRequest request) throws ApplicationException {
@@ -183,6 +238,10 @@ public class EmployeeService {
 
         if (StringUtils.isBlank(request.getDetail())) {
             throw new ApplicationException(ERROR.INVALID_PARAM, "Detail is empty");
+        }
+
+        if (StringUtils.isBlank(String.valueOf(request.getDepartmentId()))) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department is empty");
         }
     }
 }

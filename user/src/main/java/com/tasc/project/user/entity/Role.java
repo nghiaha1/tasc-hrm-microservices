@@ -1,5 +1,6 @@
 package com.tasc.project.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.tasc.entity.BaseEntity;
 import lombok.*;
 
@@ -22,5 +23,6 @@ public class Role extends BaseEntity {
 
     private String description;
     @OneToMany(mappedBy = "role")
+    @JsonBackReference
     private Set<User> users;
 }

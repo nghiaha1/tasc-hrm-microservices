@@ -9,9 +9,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleRequest {
+public class ChangePasswordRequest {
 
-    private String name;
+    private String oldPassword;
 
-    private String description;
+    private String password;
+
+    private String rePassword;
 }

@@ -1,4 +1,4 @@
-package com.tasc.project.user.model.request;
+package com.tasc.project.employee.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleRequest {
+public class UpdateDepartmentRequest {
 
     private String name;
 
     private String description;
+
+    private String detail;
+
 }

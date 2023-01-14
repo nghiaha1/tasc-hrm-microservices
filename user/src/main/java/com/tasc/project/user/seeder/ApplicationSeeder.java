@@ -31,26 +31,37 @@ public class ApplicationSeeder implements CommandLineRunner {
     private void generateRole() {
         List<Role> roles = new ArrayList<>();
 
-        Optional<Role> optionalRole1 = roleRepository.findRoleByName("ROLE_USER");
+        Optional<Role> checkEmployeeRole = roleRepository.findRoleByName("ROLE_EMPLOYEE");
 
-        if (optionalRole1.isEmpty()) {
-            Role userRole = Role.builder()
-                    .name("ROLE_USER")
-                    .description("User role")
+        if (checkEmployeeRole.isEmpty()) {
+            Role employeeRole = Role.builder()
+                    .name("ROLE_EMPLOYEE")
+                    .description("Employee role")
                     .build();
-            userRole.setStatus(BaseStatus.ACTIVE);
-            roles.add(userRole);
+            employeeRole.setStatus(BaseStatus.ACTIVE);
+            roles.add(employeeRole);
         }
 
-        Optional<Role> optionalRole2 = roleRepository.findRoleByName("ROLE_ADMIN");
+        Optional<Role> checkAccountantRole = roleRepository.findRoleByName("ROLE_ACCOUNTANT");
 
-        if (optionalRole2.isEmpty()) {
-            Role adminRole = Role.builder()
-                    .name("ROLE_ADMIN")
-                    .description("Admin role")
+        if (checkAccountantRole.isEmpty()) {
+            Role accountantRole = Role.builder()
+                    .name("ROLE_ACCOUNTANT")
+                    .description("Accountant role")
                     .build();
-            adminRole.setStatus(BaseStatus.ACTIVE);
-            roles.add(adminRole);
+            accountantRole.setStatus(BaseStatus.ACTIVE);
+            roles.add(accountantRole);
+        }
+
+        Optional<Role> checkDirectorRole = roleRepository.findRoleByName("ROLE_DIRECTOR");
+
+        if (checkDirectorRole.isEmpty()) {
+            Role directorRole = Role.builder()
+                    .name("ROLE_DIRECTOR")
+                    .description("Director role")
+                    .build();
+            directorRole.setStatus(BaseStatus.ACTIVE);
+            roles.add(directorRole);
         }
 
         roleRepository.saveAll(roles);
@@ -58,43 +69,58 @@ public class ApplicationSeeder implements CommandLineRunner {
     }
 
     private void generateUser() {
-        Optional<Role> optionalUserRole = roleRepository.findRoleByName("ROLE_USER");
-        Role userRole = optionalUserRole.get();
+        Optional<Role> optionalEmployeeRole = roleRepository.findRoleByName("ROLE_EMPLOYEE");
+        Role employeeRole = optionalEmployeeRole.get();
 
         List<User> users = new ArrayList<>();
 
-        Optional<User> optionalUser = userRepository.findUserByUsername("user1");
+        Optional<User> optionalEmployee = userRepository.findUserByUsername("employee_1");
 
-        if (optionalUser.isEmpty()) {
-            User user = User.builder()
-                    .username("user1")
+        if (optionalEmployee.isEmpty()) {
+            User employee = User.builder()
+                    .username("employee_1")
                     .password(bCryptPasswordEncoder.encode("123"))
-                    .role(userRole)
+                    .role(employeeRole)
                     .build();
-            user.setStatus(BaseStatus.ACTIVE);
-            users.add(user);
+            employee.setStatus(BaseStatus.ACTIVE);
+            users.add(employee);
         }
 
-        Optional<Role> optionalAdminRole = roleRepository.findRoleByName("ROLE_ADMIN");
-        Role adminRole = optionalAdminRole.get();
+        Optional<Role> optionalAccountantRole = roleRepository.findRoleByName("ROLE_ACCOUNTANT");
+        Role accountantRole = optionalAccountantRole.get();
 
-        Optional<User> optionalUser2 = userRepository.findUserByUsername("user1");
+        Optional<User> optionalAccountant = userRepository.findUserByUsername("accountant_1");
 
-        if (optionalUser2.isEmpty()) {
-            User admin = User.builder()
-                    .username("admin1")
+        if (optionalAccountant.isEmpty()) {
+            User accountant = User.builder()
+                    .username("accountant_1")
                     .password(bCryptPasswordEncoder.encode("123"))
-                    .role(adminRole)
+                    .role(accountantRole)
                     .build();
-            admin.setStatus(BaseStatus.ACTIVE);
-            users.add(admin);
+            accountant.setStatus(BaseStatus.ACTIVE);
+            users.add(accountant);
+        }
+
+        Optional<Role> optionalDirectorRole = roleRepository.findRoleByName("ROLE_DIRECTOR");
+        Role directorRole = optionalDirectorRole.get();
+
+        Optional<User> optionalDirector = userRepository.findUserByUsername("director_1");
+
+        if (optionalDirector.isEmpty()) {
+            User director = User.builder()
+                    .username("director_1")
+                    .password(bCryptPasswordEncoder.encode("123"))
+                    .role(directorRole)
+                    .build();
+            director.setStatus(BaseStatus.ACTIVE);
+            users.add(director);
         }
 
         userRepository.saveAll(users);
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (isSeeding) {
             generateRole();
             generateUser();

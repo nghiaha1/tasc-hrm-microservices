@@ -1,5 +1,6 @@
 package com.tasc.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tasc.entity.AttendanceStatus;
 import lombok.*;
 
@@ -15,8 +16,10 @@ public class AttendanceDTO {
 
     private long employeeId;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime checkIn;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime checkOut;
 
     private AttendanceStatus attendanceStatus;

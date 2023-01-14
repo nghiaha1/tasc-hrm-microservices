@@ -16,7 +16,7 @@ public class RoleController extends BaseController {
     RoleService roleService;
 
     @PostMapping
-    public ResponseEntity<BaseResponseV2> create(RoleRequest request) throws ApplicationException {
+    public ResponseEntity<BaseResponseV2> create(@RequestBody RoleRequest request) throws ApplicationException {
         return createdResponse(roleService.create(request));
     }
 

@@ -1,8 +1,11 @@
 server:
   port: 8080
 
+#redis:
+#  config: D:/TASC/microservice/project/config/singleNodeConfig.yaml
+
 redis:
-  config: D:/TASC/microservice/project/config/singleNodeConfig.yaml
+  config: D:/TASC/tasc-project-microservices/config/singleNodeConfig.yaml
 
 zuul:
   routes:
@@ -10,9 +13,25 @@ zuul:
       path: /user/**
       url: http://localhost:8082/api/v1/user
 
+    role:
+      path: /role/**
+      url: http://localhost:8082/api/v1/role
+
     employee:
       path: /employee/**
       url: http://localhost:8083/api/v1/employee
+
+    attendance:
+      path: /attendance/**
+      url: http://localhost:8086/api/v1/attendance
+
+    department:
+      path: /department/**
+      url: http://localhost:8083/api/v1/department
+
+    salary:
+      path: /salary/**
+      url: http://localhost:8085/api/v1/salary
 
 spring:
   application:

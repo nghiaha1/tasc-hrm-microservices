@@ -29,7 +29,6 @@ public class EmployeeDTO implements Serializable {
 
     private BigDecimal salary;
 
-    private BigDecimal bonus;
 
     private String description;
 
@@ -39,8 +38,8 @@ public class EmployeeDTO implements Serializable {
 
     private BaseStatus status;
 
-    private BigDecimal hourlyRate;
+    private BigDecimal montlyRate;
 
-    public void setUserId(Long aLong) {
-    }
+    private long departmentId;
+
 }

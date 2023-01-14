@@ -21,11 +21,14 @@ public class Department extends BaseEntity {
 
     private String name;
 
+    @Lob
     private String description;
 
+    @Lob
     private String detail;
 
     @OneToMany(mappedBy = "department")
+    @JsonBackReference
     private List<Employee> employeeList;
 
     @ManyToOne
@@ -37,7 +40,7 @@ public class Department extends BaseEntity {
 
     @OneToMany(mappedBy = "parentDepartment")
     @JsonBackReference
-    private List<Department> childrenDepartment;
+    private List<Department> childrenDepartments;
 
     private int isRoot;
 }

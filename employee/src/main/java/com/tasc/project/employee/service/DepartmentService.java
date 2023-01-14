@@ -10,11 +10,15 @@ import com.tasc.project.employee.entity.Department;
 import com.tasc.project.employee.entity.DepartmentEmployee;
 import com.tasc.project.employee.entity.Employee;
 import com.tasc.project.employee.model.request.CreateDepartmentRequest;
+import com.tasc.project.employee.model.request.UpdateDepartmentRequest;
 import com.tasc.project.employee.repository.DepartmentEmployeeRepository;
 import com.tasc.project.employee.repository.DepartmentRepository;
 import com.tasc.project.employee.repository.EmployeeRepository;
+import lombok.extern.log4j.Log4j2;
+import net.datafaker.providers.base.App;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Log4j2
 public class DepartmentService {
     @Autowired
     DepartmentRepository departmentRepository;
@@ -32,8 +37,36 @@ public class DepartmentService {
     @Autowired
     DepartmentEmployeeRepository departmentEmployeeRepository;
 
+    public BaseResponseV2 findAll(BaseStatus status, int page, int pageSize) throws ApplicationException {
+        return new BaseResponseV2(departmentRepository.findAllByStatus(status, PageRequest.of(page, pageSize)));
+    }
+
+    public BaseResponseV2 findParentsByChild(String name) throws ApplicationException {
+
+        List<Department> optionalDepartment = departmentRepository.findDepartmentByNameContaining(name);
+
+        if (optionalDepartment.isEmpty()) {
+            log.info("Not found parents department with child id {}", name);
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found parents department with child name " + name);
+        }
+
+        return new BaseResponseV2<>(departmentRepository.findParentsByChild(name));
+    }
+
+    public BaseResponseV2 findChildrenByParent(String name) throws ApplicationException {
+
+        List<Department> optionalDepartment = departmentRepository.findDepartmentByNameContaining(name);
+
+        if (optionalDepartment.isEmpty()) {
+            log.info("Not found children department with parent id {}", name);
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found children department with parent name " + name);
+        }
+
+        return new BaseResponseV2<>(departmentRepository.findChildrenByParent(name));
+    }
+
     public BaseResponseV2<DepartmentDTO> create(CreateDepartmentRequest request) throws ApplicationException {
-        validateRequest(request);
+        validateCreateRequest(request);
 
         if (!request.checkIsRoot()) {
             Optional<Department> checkParentOpt = departmentRepository.findById(request.getParentDepartmentId());
@@ -50,30 +83,15 @@ public class DepartmentService {
                     .isRoot(request.checkIsRoot() ? Constant.ONOFF.ON : Constant.ONOFF.OFF)
                     .build();
 
-            if (parentDepartment.getChildrenDepartment().contains(department)) {
+            if (parentDepartment.getChildrenDepartments().contains(department)) {
                 throw new ApplicationException(ERROR.INVALID_PARAM, "Already exist!");
             }
 
             List<Department> childDepartments = new ArrayList<>();
-            department.setChildrenDepartment(childDepartments);
+            department.setChildrenDepartments(childDepartments);
             department.setParentDepartment(parentDepartment);
-            parentDepartment.getChildrenDepartment().add(department);
+            parentDepartment.getChildrenDepartments().add(department);
             department.setStatus(BaseStatus.ACTIVE);
-
-            List<Employee> employeeList = new ArrayList<>();
-
-            for (int i = 0; i < request.getEmployeeIdList().size(); i++) {
-                Optional<Employee> optionalEmployee = employeeRepository.findById(request.getEmployeeIdList().get(i));
-
-                if (optionalEmployee.isEmpty()) {
-                    throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with ID : " + request.getEmployeeIdList().get(i));
-                }
-                Employee employee = optionalEmployee.get();
-
-                employeeList.add(employee);
-            }
-
-            department.setEmployeeList(employeeList);
 
             departmentRepository.save(department);
 
@@ -87,21 +105,15 @@ public class DepartmentService {
                     .name(department.getName())
                     .description(department.getDescription())
                     .detail(department.getDetail())
-                    .parentDepartment(department.getParentDepartment().getName())
                     .childrenDepartmentList(childrenDepartment)
                     .isRoot(department.getIsRoot())
                     .build();
 
-            List<Long> employeeIdList = new ArrayList<>();
-
-            for (Employee employee : department.getEmployeeList()) {
-                if (StringUtils.isNotBlank(String.valueOf(employee.getId()))) {
-                    employeeIdList.add(employee.getId());
-                    departmentDTO.setEmployeeList(employeeIdList);
-                }
+            if (department.getParentDepartment() == null) {
+                departmentDTO.setParentDepartment("");
             }
 
-            return new BaseResponseV2<DepartmentDTO>(departmentDTO);
+            return new BaseResponseV2<>(departmentDTO);
         }
 
         Department department = Department.builder()
@@ -113,78 +125,65 @@ public class DepartmentService {
 
         List<Department> childDepartments = new ArrayList<>();
 
-        department.setChildrenDepartment(childDepartments);
+        department.setChildrenDepartments(childDepartments);
         department.setParentDepartment(null);
         department.setStatus(BaseStatus.ACTIVE);
 
-        List<Employee> employeeList = new ArrayList<>();
-
-        for (int i = 0; i < request.getEmployeeIdList().size(); i++) {
-            Optional<Employee> optionalEmployee = employeeRepository.findById(request.getEmployeeIdList().get(i));
-
-            if (optionalEmployee.isEmpty()) {
-                throw new ApplicationException(ERROR.INVALID_PARAM, "Not found employee with ID : " + request.getEmployeeIdList().get(i));
-            }
-            Employee employee = optionalEmployee.get();
-
-            employeeList.add(employee);
-        }
-
-        department.setEmployeeList(employeeList);
-
         departmentRepository.save(department);
 
-        List<Long> childrenDepartment = new ArrayList<>();
+        List<Long> childrenDepartments = new ArrayList<>();
         for (Department d : childDepartments) {
             Long departmentId = d.getId();
-            childrenDepartment.add(departmentId);
+            childrenDepartments.add(departmentId);
         }
 
         DepartmentDTO departmentDTO = DepartmentDTO.builder()
                 .name(department.getName())
                 .description(department.getDescription())
                 .detail(department.getDetail())
-                .parentDepartment(department.getParentDepartment().getName())
-                .childrenDepartmentList(childrenDepartment)
+                .childrenDepartmentList(childrenDepartments)
                 .isRoot(department.getIsRoot())
                 .build();
 
-        List<Long> employeeIdList = new ArrayList<>();
-
-        for (Employee employee : department.getEmployeeList()) {
-            if (StringUtils.isNotBlank(String.valueOf(employee.getId()))) {
-                employeeIdList.add(employee.getId());
-                departmentDTO.setEmployeeList(employeeIdList);
-            }
+        if (department.getParentDepartment() == null) {
+            departmentDTO.setParentDepartment("");
         }
 
-        return new BaseResponseV2<DepartmentDTO>(departmentDTO);
+        return new BaseResponseV2<>(departmentDTO);
     }
 
-    private void validateRequest(CreateDepartmentRequest request) throws ApplicationException {
-        if (StringUtils.isBlank(request.getName())) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's name is empty");
+    public BaseResponseV2<DepartmentDTO> update(long id, UpdateDepartmentRequest request) throws ApplicationException {
+        validateUpdateRequest(request);
+
+        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+
+        if (optionalDepartment.isEmpty()) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Not found department with ID : " + id);
         }
 
-        if (StringUtils.isBlank(request.getDescription())) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's description is empty");
+        Department existedDepartment = optionalDepartment.get();
+
+        existedDepartment.setName(request.getName());
+        existedDepartment.setDescription(request.getDescription());
+        existedDepartment.setDetail(request.getDetail());
+
+        departmentRepository.save(existedDepartment);
+
+        List<Long> childrenDepartments = new ArrayList<>();
+        for (Department d : existedDepartment.getChildrenDepartments()) {
+            Long departmentId = d.getId();
+            childrenDepartments.add(departmentId);
         }
 
-        if (StringUtils.isBlank(request.getDetail())) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's detail is empty");
-        }
+        DepartmentDTO departmentDTO = DepartmentDTO.builder()
+                .name(existedDepartment.getName())
+                .description(existedDepartment.getDescription())
+                .detail(existedDepartment.getDetail())
+                .childrenDepartmentList(childrenDepartments)
+                .isRoot(existedDepartment.getIsRoot())
+                .build();
 
-        if (request.getEmployeeIdList().isEmpty()) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's employee list is empty");
-        }
-
-        if (!request.checkIsRoot() && request.getParentDepartmentId() == null) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Parent is blank");
-        }
-
-        if (request.checkIsRoot() && request.getParentDepartmentId() != null) {
-            throw new ApplicationException(ERROR.INVALID_PARAM, "Level is invalid");
-        }
+        return new BaseResponseV2<>(departmentDTO);
     }
 
     public BaseResponseV2 delete(long id) throws ApplicationException {
@@ -199,11 +198,11 @@ public class DepartmentService {
         /* check if department is root
            if root delete relationship with children department */
         if (department.getIsRoot() == 0) {
-            department.getChildrenDepartment().remove(department);
+            department.getChildrenDepartments().remove(department);
         }
 
         // delete relationship with parent department if exist
-        for (Department d : department.getChildrenDepartment()) {
+        for (Department d : department.getChildrenDepartments()) {
             if (d.getParentDepartment() != null) {
                 this.delete(d.getId());
             }
@@ -218,6 +217,41 @@ public class DepartmentService {
         departmentRepository.deleteById(id);
 
         return new BaseResponseV2();
+    }
 
+    private void validateCreateRequest(CreateDepartmentRequest request) throws ApplicationException {
+        if (StringUtils.isBlank(request.getName())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's name is empty");
+        }
+
+        if (StringUtils.isBlank(request.getDescription())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's description is empty");
+        }
+
+        if (StringUtils.isBlank(request.getDetail())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's detail is empty");
+        }
+
+        if (!request.checkIsRoot() && request.getParentDepartmentId() == null) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Parent is blank");
+        }
+
+        if (request.checkIsRoot() && request.getParentDepartmentId() != null) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Level is invalid");
+        }
+    }
+
+    private void validateUpdateRequest(UpdateDepartmentRequest request) throws ApplicationException {
+        if (StringUtils.isBlank(request.getName())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's name is empty");
+        }
+
+        if (StringUtils.isBlank(request.getDescription())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's description is empty");
+        }
+
+        if (StringUtils.isBlank(request.getDetail())) {
+            throw new ApplicationException(ERROR.INVALID_PARAM, "Department's detail is empty");
+        }
     }
 }
