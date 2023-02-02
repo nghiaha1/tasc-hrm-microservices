@@ -12,7 +12,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/user?createDatabaseIfNotExist=true
     username: root
-    password:
+    password: 123
 
     hikari:
       connection-timeout: 3600000
@@ -26,11 +26,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    hibernate:
-      ddl-auto: create-drop
-
-#redis:
-#  config: D:/TASC/microservice/project/config/singleNodeConfig.yaml
+#    hibernate:
+#      ddl-auto: update
 
 redis:
-  config: D:/TASC/tasc-project-microservices/config/singleNodeConfig.yaml
+  config: ./././config/singleNodeConfig.yaml

@@ -66,7 +66,7 @@ public class UserService {
         user.setStatus(BaseStatus.ACTIVE);
         user.setEmployee(employeeDTO.getFullName());
 
-        Optional<Role> optionalRole = roleRepository.findRoleByName("ROLE_USER");
+        Optional<Role> optionalRole = roleRepository.findRoleByName("ROLE_EMPLOYEE");
 
         if (optionalRole.isEmpty()) {
             throw new ApplicationException(ERROR.INVALID_PARAM, "USER role not found");

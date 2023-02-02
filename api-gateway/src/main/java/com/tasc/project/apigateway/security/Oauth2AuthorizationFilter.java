@@ -84,7 +84,6 @@ public class Oauth2AuthorizationFilter extends BasicAuthenticationFilter {
                 response.setCharacterEncoding("UTF-8");
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 return;
-
             }
         }
 

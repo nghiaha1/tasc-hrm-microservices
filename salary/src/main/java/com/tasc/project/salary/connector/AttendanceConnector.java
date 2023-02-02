@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.util.List;
 
-@FeignClient(name = "attendance-service", url = "http://localhost:8086/api/v1/attendance")
+@FeignClient(name = "attendance-service", url = "${tasc_attendance_address}")
 public interface AttendanceConnector {
 
     @GetMapping(path = "/employee")

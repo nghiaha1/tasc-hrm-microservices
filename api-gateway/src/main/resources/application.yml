@@ -1,11 +1,8 @@
 server:
   port: 8080
 
-#redis:
-#  config: D:/TASC/microservice/project/config/singleNodeConfig.yaml
-
 redis:
-  config: D:/TASC/tasc-project-microservices/config/singleNodeConfig.yaml
+  config: ./././config/singleNodeConfig.yaml
 
 zuul:
   routes:

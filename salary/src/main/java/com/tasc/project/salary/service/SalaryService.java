@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -37,6 +38,7 @@ public class SalaryService {
         if (!employeeResponseInfo.isSuccess()) {
             throw new ApplicationException(ERROR.INVALID_PARAM);
         }
+
         EmployeeDTO employeeDTO = employeeResponseInfo.getData();
 
         if (employeeDTO == null) {
@@ -58,20 +60,24 @@ public class SalaryService {
 
         BigDecimal totalMonths = BigDecimal.ZERO;
 
-        for (AttendanceDTO attendanceDTO : attendanceDTOList) {
+//        BigDecimal totalHours = BigDecimal.ZERO;
+//
+//        for (AttendanceDTO attendanceDTO : attendanceDTOList) {
 //            Duration duration = Duration.between(attendanceDTO.getCheckIn(), attendanceDTO.getCheckOut());
 //            totalHours = totalHours.add(new BigDecimal(duration.toHours()));
-        }
+//        }
 
         Period period = Period.between(startDate, endDate);
         totalMonths = totalMonths.add(new BigDecimal(period.getMonths() + period.getYears() * 12));
 
         BigDecimal monthlyRate = employeeDTO.getMontlyRate();
 
-        log.info("Hourly rate : {}", monthlyRate );
-        log.info("Total hours : {}", totalMonths );
+        log.info("Hourly rate : {}", monthlyRate);
+        log.info("Total hours : {}", totalMonths);
 
         return new BaseResponseV2<>(totalMonths.multiply(monthlyRate));
+
+
     }
 
 }
