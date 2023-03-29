@@ -10,7 +10,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/user?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/user?createDatabaseIfNotExist=true
     username: root
     password: 123
 
@@ -26,8 +26,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
-#    hibernate:
-#      ddl-auto: update
+    hibernate:
+      ddl-auto: update
 
 redis:
   config: ./././config/singleNodeConfig.yaml
+
+tasc_employee_address:
+  http://localhost:8080/employee
+
+tasc_attendance_address:
+  http://localhost:8080/attendance

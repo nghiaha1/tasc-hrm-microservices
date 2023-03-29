@@ -2,7 +2,6 @@ package com.tasc.project.apigateway.security;
 
 
 import com.tasc.model.constans.AUTHENTICATION;
-
 import com.tasc.project.apigateway.model.TassUserAuthentication;
 import com.tasc.project.apigateway.utils.HttpUtil;
 import com.tasc.redis.dto.UserLoginDTO;
@@ -10,7 +9,6 @@ import com.tasc.redis.repository.UserLoginRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.AntPathMatcher;

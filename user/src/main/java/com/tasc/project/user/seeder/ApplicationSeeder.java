@@ -17,7 +17,7 @@ import java.util.Optional;
 @Component
 public class ApplicationSeeder implements CommandLineRunner {
 
-    private boolean isSeeding = true;
+    private boolean isSeeding = false;
 
     @Autowired
     RoleRepository roleRepository;
